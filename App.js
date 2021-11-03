@@ -11,9 +11,10 @@ import {
   extendTheme,
   VStack,
   Code,
+  Container,
 } from "native-base";
-import NativeBaseIcon from "./components/NativeBaseIcon";
-
+import { TodoInput } from "./components/TodoInput";
+import { TodoList } from "./components/TodoList";
 // Define the config
 const config = {
   useSystemColorMode: false,
@@ -24,30 +25,38 @@ const config = {
 export const theme = extendTheme({ config });
 
 export default function App() {
+  const [todos, setTodos] = React.useState([]);
+  const [input, setInput] = React.useState("");
+  const onDeleteItem = (id) => {
+    const newTodos = todos.filter((todo) => todo.id !== id);
+    console.log(newTodos);
+    setTodos(newTodos);
+  };
+  const onToggleItem = (id) => {
+    const newTodos = todos.map((todo) =>
+      todo.id === id ? { ...todo, completed: !todo.completed } : todo
+    );
+    setTodos(newTodos);
+  };
+  const onChangeInput = (text) => {
+    setInput(text);
+  };
+  const onAddItem = () => {
+    console.log("Adding "+input);
+    if (input.trim()) {
+      setTodos([...todos, { id: Date.now(), text: input, completed: false }]);
+      setInput("");
+    }
+  };
+
+  /*Return the App containing an input field, and add button, and a todo list of items*/
   return (
     <NativeBaseProvider>
-      <Center
-        _dark={{ bg: "blueGray.900" }}
-        _light={{ bg: "blueGray.50" }}
-        px={4}
-        flex={1}
-      >
-        <VStack space={5} alignItems="center">
-          <NativeBaseIcon />
-          <Heading size="lg">Welcome to NativeBase</Heading>
-          <HStack space={2} alignItems="center">
-            <Text>Edit</Text>
-            <Code>App.js</Code>
-            <Text>and save to reload.</Text>
-          </HStack>
-          <Link href="https://docs.nativebase.io" isExternal>
-            <Text color="primary.500" underline fontSize={"xl"}>
-              Learn NativeBase
-            </Text>
-          </Link>
-          <ToggleDarkMode />
+        <VStack space={5} alignItems="center" mt={20} width="100%">
+          <Heading>Todo List</Heading>
+          <TodoInput value={input} onChangeText={onChangeInput} onPress={onAddItem} />
+          <TodoList items={todos} onDeleteItem={onDeleteItem} onToggleItem={onToggleItem} />
         </VStack>
-      </Center>
     </NativeBaseProvider>
   );
 }
